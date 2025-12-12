@@ -8,6 +8,27 @@ const port = 3000
 app.use(cors())
 app.use(express.json())
 
+const verifyFBToken = async (req, res, next) => {
+    const token = req.headers.authorization;
+
+    if (!token) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+
+    try {
+        const idToken = token.split(' ')[1];
+        const decoded = await admin.auth().verifyIdToken(idToken);
+        console.log('decoded in the token', decoded);
+        req.decoded_email = decoded.email;
+        next();
+    }
+    catch (err) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+
+
+}
+
 const uri = process.env.MONGODB_URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -23,7 +44,8 @@ async function run() {
   try {
      const db = client.db('ticketBari-db')
      const usersCollection = db.collection('users')
-     await client.connect();
+     const ticketsCollection = db.collection('tickets')
+     const paymentCollecttion = db.collection('payments')
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
