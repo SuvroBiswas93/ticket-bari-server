@@ -47,7 +47,8 @@ async function run() {
      const db = client.db('ticketBari-db')
      const usersCollection = db.collection('users')
      const ticketsCollection = db.collection('tickets')
-     const paymentCollecttion = db.collection('payments')
+     const bookingsCollection = db.collection('bookings')
+     const paymentCollecttion = db.collection('transactions')
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
