@@ -60,10 +60,11 @@ async function run() {
      const bookingsCollection = db.collection('bookings')
      const paymentCollecttion = db.collection('payments')
 
+     //payment related api
      app.post('/payment-checkout-session', async (req, res) => {
       const { bookingId, ticketTitle, totalPrice, userEmail, ticketId } = req.body;
 
-      const amount = parseInt(totalPrice) * 100; // convert to cents
+      const amount = parseInt(totalPrice) * 100; 
 
       const session = await stripe.checkout.sessions.create({
         line_items: [
@@ -133,7 +134,7 @@ async function run() {
             userEmail: session.customer_email,
             paidAt: new Date()
         };
-        const resultTransaction = await transactionsCollection.insertOne(transaction);
+        const resultTransaction = await paymentCollecttion.insertOne(transaction);
 
         res.send({
             success: true,
