@@ -79,11 +79,11 @@ class PaymentService {
     return session;
   }
   async getUserTransactions(userId) {
-    return await transactionRepository.findUserTransactions(userId);
+    return await transactionRepository.findUserTransactions(userId.toString());
   }
 
   async getTransactionById(transactionId) {
-    return await transactionRepository.findById(transactionId);
+    return await transactionRepository.findById(transactionId.toString());
   }
   async handleWebhook(req) {
     const sig = req.headers['stripe-signature'];
