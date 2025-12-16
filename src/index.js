@@ -5,20 +5,28 @@ import { connectDB } from './config/database.js';
 import initializeAdmin from './utils/initializeAdmin.js';
 import { initializeFirebase } from './config/firebase.js';
 import errorHandler from './middleware/error.js';
+import authRoutes from './routes/auth.routes.js';
 
 const app = express();
-const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'http://localhost:5173'];
+const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5000'];
 const port = env.port;
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log(origin, 'origin');
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie']
 }));
 
 app.use(express.json({ limit: '10mb' }));
@@ -28,7 +36,7 @@ app.get('/', (_req, res) => {
   res.json({ message: 'server is running' });
 });
 
-
+app.use('/api/auth', authRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
