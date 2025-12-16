@@ -2,6 +2,7 @@ import {env} from './config/env.js';
 import express from 'express';
 import cors from 'cors';
 import { connectDB } from './config/database.js';
+import initializeAdmin from './utils/initializeAdmin.js';
 import { initializeFirebase } from './config/firebase.js';
 import errorHandler from './middleware/error.js';
 
@@ -29,7 +30,7 @@ app.get('/', (_req, res) => {
 
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     status: 'error',
     message: `Route ${req.originalUrl} not found`
@@ -42,6 +43,7 @@ app.use(errorHandler);
 async function startServer() {
   try {
     await connectDB();
+    await initializeAdmin();
     initializeFirebase();
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
