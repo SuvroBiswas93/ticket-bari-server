@@ -7,6 +7,7 @@ import { initializeFirebase } from './config/firebase.js';
 import errorHandler from './middleware/error.js';
 import authRoutes from './routes/auth.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
+import bookingRoutes from './routes/booking.routes.js';
 
 const app = express();
 const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5000'];
@@ -39,6 +40,7 @@ app.get('/', (_req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/bookings', bookingRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
