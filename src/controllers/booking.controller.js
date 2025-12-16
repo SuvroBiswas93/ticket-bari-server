@@ -26,7 +26,7 @@ class BookingController {
 
   async getUserBookings(req, res) {
     try {
-      const bookings = await bookingService.getUserBookings(req.user._id);
+      const bookings = await bookingService.getUserBookings(req.user._id.toString());
       
       res.status(200).json({
         status: 'success',

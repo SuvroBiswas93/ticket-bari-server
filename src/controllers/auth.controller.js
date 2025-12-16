@@ -9,7 +9,7 @@ const updateProfileSchema = Joi.object({
 class AuthController {
   async getProfile(req, res) {
     try {
-      const user = await authService.getCurrentUser(req.user._id);
+      const user = await authService.getCurrentUser(req.user._id.toString());
       
       const userResponse = {
         _id: user._id,
@@ -46,7 +46,7 @@ class AuthController {
         });
       }
 
-      const user = await authService.updateProfile(req.user._id, value);
+      const user = await authService.updateProfile(req.user._id.toString(), value);
       
       const userResponse = {
         _id: user._id,
@@ -74,7 +74,7 @@ class AuthController {
 
   async registerVendor(req, res) {
     try {
-      const user = await authService.registerVendor(req.user._id);
+      const user = await authService.registerVendor(req.user._id.toString());
       
       const userResponse = {
         _id: user._id,

@@ -39,7 +39,7 @@ class PaymentService {
       throw new Error('User not found');
     }
     
-    const vendor = await vendorRepository.findById(booking.vendorId);
+    const vendor = await userRepository.findById(booking.vendorId);
     if (!vendor) {
       throw new Error('Vendor not found');
     }
@@ -51,7 +51,7 @@ class PaymentService {
     const amount = Math.round(Number(booking.ticketPrice) * 100);
 
     // 4 Create Stripe session
-    const session = await stripe.checkout.sessions.create({
+    const session = await this.stripe.checkout.sessions.create({
       line_items: [
         {
           price_data: {
@@ -90,7 +90,7 @@ class PaymentService {
     let event;
 
     try {
-      event = stripe.webhooks.constructEvent(
+      event = this.stripe.webhooks.constructEvent(
         req.body,
         sig,
         env.stripeWebhookSecret

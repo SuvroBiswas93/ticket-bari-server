@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 const app = express();
 const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5000'];
@@ -32,8 +33,25 @@ app.use(cors({
   exposedHeaders: ['Set-Cookie']
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Apply raw body parser for webhook route (must be before JSON parser)
+app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
+
+const jsonParser = express.json({ limit: '10mb' });
+const urlencodedParser = express.urlencoded({ extended: true, limit: '10mb' });
+
+app.use((req, res, next) => {
+  if (req.path === '/api/payment/webhook') {
+    return next();
+  }
+  jsonParser(req, res, next);
+});
+
+app.use((req, res, next) => {
+  if (req.path === '/api/payment/webhook') {
+    return next();
+  }
+  urlencodedParser(req, res, next);
+});
 
 app.get('/', (_req, res) => {
   res.json({ message: 'server is running' });
@@ -43,6 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payment', paymentRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({

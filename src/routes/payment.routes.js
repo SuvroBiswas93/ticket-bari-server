@@ -6,8 +6,8 @@ import { paymentValidation } from '../validations/payment.validation.js';
 
 const router = express.Router();
 
-router.post('/payment-checkout-session', auth, validate(paymentValidation.createCheckoutSession), paymentController.createCheckoutSession);
-router.post('/webhook', express.raw({ type: 'application/json' }), paymentController.handleWebhook);
+router.post('/create-checkout-session', auth, validate(paymentValidation.createCheckoutSession), paymentController.createCheckoutSession);
+router.post('/webhook', paymentController.handleWebhook);
 router.get('/transactions', auth, paymentController.getUserTransactions);
 router.get('/transactions/:id', auth, paymentController.getTransactionById);
 
