@@ -2,6 +2,7 @@ import bookingRepository from '../repositories/booking.repository.js';
 import ticketRepository from '../repositories/ticket.repository.js';
 import userRepository from '../repositories/user.repository.js';
 import moment from 'moment';
+import transactionRepository from '../repositories/transaction.repository.js';
 
 class BookingService {
   async createBooking(ticketId, userId, bookingQuantity) {
@@ -128,7 +129,6 @@ class BookingService {
       paymentId
     );
 
-    const transactionRepository = (await import('./transaction.service.js')).default;
     await transactionRepository.create({
       userId: booking.userId,
       bookingId: bookingId.toString(),

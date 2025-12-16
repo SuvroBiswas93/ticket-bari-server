@@ -1,5 +1,6 @@
 import ticketRepository from '../repositories/ticket.repository.js';
 import userRepository from '../repositories/user.repository.js';
+import bookingRepository from '../repositories/booking.repository.js';
 
 class TicketService {
   async createTicket(ticketData, vendorId) {
@@ -75,7 +76,6 @@ class TicketService {
       throw new Error('Not authorized to delete this ticket');
     }
 
-    const bookingRepository = (await import('./booking.service.js')).default;
     const bookings = await bookingRepository.findBookingsByTicket(ticketId);
     
     if (bookings.length > 0) {
