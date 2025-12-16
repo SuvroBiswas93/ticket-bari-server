@@ -34,6 +34,16 @@ function schemaToJoi(customSchema, options = {}) {
       default:
         joiField = Joi.any();
     }
+    
+    // Handle default values (static or function)
+    if (value.default !== undefined) {
+      if (typeof value.default === 'function') {
+        joiField = joiField.default(value.default);
+      } else {
+        joiField = joiField.default(value.default);
+      }
+    }
+    
     if (!partial && value.required) {
       joiField = joiField.required();
     }

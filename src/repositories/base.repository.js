@@ -48,15 +48,21 @@ export class BaseRepository {
   }
 
   async create(data) {
+    let payload = data;
     if (this.joiSchema) {
-      const { error } = this.joiSchema.validate(data);
+      const { error, value } = this.joiSchema.validate(data, {
+        abortEarly: false,
+        stripUnknown: true,
+        allowUnknown: false
+      });
+      payload = value;
       if (error) {
         throw new Error('Validation error: ' + error.message);
       }
     }
     const collection = this.getCollection();
 
-    const processedData = this.convertDates(data);
+    const processedData = this.convertDates(payload);
 
     const now = new Date();
     const item = {
@@ -69,18 +75,22 @@ export class BaseRepository {
   }
 
   async createMany(dataArray) {
-    if (this.joiSchema) {
-      for (const data of dataArray) {
-        const { error } = this.joiSchema.validate(data);
+    const collection = this.getCollection();
+    const now = new Date();
+    const items = dataArray.map(data => {
+      let payload = data;
+      if (this.joiSchema) {
+        const { error, value } = this.joiSchema.validate(data, {
+          abortEarly: false,
+          stripUnknown: true,
+          allowUnknown: false
+        });
+        payload = value;
         if (error) {
           throw new Error('Validation error in createMany: ' + error.message);
         }
       }
-    }
-    const collection = this.getCollection();
-    const now = new Date();
-    const items = dataArray.map(data => {
-      const processedData = this.convertDates(data);
+      const processedData = this.convertDates(payload);
       return {
         ...processedData,
         createdAt: now,
