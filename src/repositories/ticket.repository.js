@@ -105,7 +105,7 @@ class TicketRepository extends BaseRepository {
   async reduceAvailableQuantity(ticketId, quantity) {
     const collection = this.getCollection();
     return await collection.findOneAndUpdate(
-      { _id: ticketId },
+      { _id: this.toObjectId(ticketId) },
       { 
         $inc: { availableQuantity: -quantity },
         $set: { updatedAt: new Date() }
@@ -117,7 +117,7 @@ class TicketRepository extends BaseRepository {
   async increaseAvailableQuantity(ticketId, quantity) {
     const collection = this.getCollection();
     return await collection.findOneAndUpdate(
-      { _id: ticketId },
+      { _id: this.toObjectId(ticketId) },
       { 
         $inc: { availableQuantity: quantity },
         $set: { updatedAt: new Date() }
