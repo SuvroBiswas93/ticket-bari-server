@@ -101,49 +101,6 @@ class BookingService {
 
     return await bookingRepository.updateBookingStatus(bookingId, status);
   }
-
-  async processPayment(bookingId, paymentId, userId) {
-    const booking = await bookingRepository.findById(bookingId);
-    if (!booking) {
-      throw new Error('Booking not found');
-    }
-
-    if (booking.userId !== userId.toString()) {
-      throw new Error('Not authorized to process payment for this booking');
-    }
-
-
-    if (booking.status !== 'accepted') {
-      throw new Error('Booking must be accepted before payment');
-    }
-
-    const departureDateTime = moment(booking.departureTime);
-    if (departureDateTime.isBefore(moment())) {
-      throw new Error('Cannot pay for past departure');
-    }
-
-
-    const updatedBooking = await bookingRepository.updatePaymentStatus(
-      bookingId, 
-      'paid', 
-      paymentId
-    );
-
-    await transactionRepository.create({
-      userId: booking.userId,
-      bookingId: bookingId.toString(),
-      ticketId: booking.ticketId,
-      ticketTitle: booking.ticketTitle,
-      amount: booking.totalPrice,
-      currency: 'BDT',
-      paymentMethod: 'stripe',
-      transactionId: paymentId,
-      status: 'success'
-    });
-
-    return updatedBooking;
-  }
-
   async cancelBooking(bookingId, userId) {
     const booking = await bookingRepository.findById(bookingId);
     if (!booking) {

@@ -9,7 +9,6 @@ const router = express.Router();
 
 router.post('/', auth, validate(bookingValidation.createBooking), bookingController.createBooking);
 router.get('/user/my-bookings', auth, bookingController.getUserBookings);
-router.post('/:id/payment', auth, validate(bookingValidation.processPayment), bookingController.processPayment);
 router.delete('/:id/cancel', auth, bookingController.cancelBooking);
 
 router.get('/vendor/my-bookings', auth, vendorOnly, bookingController.getVendorBookings);

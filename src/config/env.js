@@ -10,4 +10,6 @@ export const env = {
     firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY,
     firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     adminEmail: process.env.ADMIN_EMAIL,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
 };
