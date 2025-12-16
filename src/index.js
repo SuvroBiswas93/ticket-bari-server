@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectDB } from './config/database.js';
 import { initializeFirebase } from './config/firebase.js';
+import errorHandler from './middleware/error.js';
 
 const app = express();
 const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'http://localhost:5173'];
@@ -25,6 +26,18 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.get('/', (_req, res) => {
   res.json({ message: 'server is running' });
 });
+
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: `Route ${req.originalUrl} not found`
+  });
+});
+
+// Error handling middleware
+app.use(errorHandler);
 
 async function startServer() {
   try {
