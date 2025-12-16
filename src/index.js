@@ -1,6 +1,7 @@
 import {env} from './config/env.js';
 import express from 'express';
 import cors from 'cors';
+import { connectDB } from './config/database.js';
 
 const app = express();
 const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'http://localhost:5173'];
@@ -26,6 +27,7 @@ app.get('/', (_req, res) => {
 
 async function startServer() {
   try {
+    await connectDB();
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
