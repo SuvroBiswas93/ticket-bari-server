@@ -13,7 +13,7 @@ router.get('/latest', ticketController.getLatestTickets);
 router.get('/:id', ticketController.getTicketById);
 
 router.post('/', auth, validate(ticketValidation.createTicket), ticketController.createTicket);
-router.get('/vendor/my-tickets', auth, vendorOnly, ticketController.getVendorTickets);
+router.get('/vendor/my-tickets', auth, vendorOrAdmin, ticketController.getVendorTickets);
 router.put('/:id', auth, vendorOrAdmin, validate(ticketValidation.updateTicket), ticketController.updateTicket);
 router.delete('/:id', auth, vendorOnly, ticketController.deleteTicket);
 

@@ -84,7 +84,7 @@ class TicketController {
 
   async getVendorTickets(req, res) {
     try {
-      const tickets = await ticketService.getVendorTickets(req.user._id);
+      const tickets = await ticketService.getVendorTickets(req.user._id.toString());
       
       res.status(200).json({
         status: 'success',
@@ -103,7 +103,7 @@ class TicketController {
       const ticket = await ticketService.updateTicket(
         req.params.id, 
         req.body, 
-        req.user._id
+        req.user._id.toString()
       );
       
       res.status(200).json({
@@ -121,7 +121,7 @@ class TicketController {
 
   async deleteTicket(req, res) {
     try {
-      await ticketService.deleteTicket(req.params.id, req.user._id);
+      await ticketService.deleteTicket(req.params.id, req.user._id.toString());
       
       res.status(200).json({
         status: 'success',
