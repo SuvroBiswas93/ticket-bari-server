@@ -78,8 +78,8 @@ class TicketRepository extends BaseRepository {
     
     
     const dateConditions = [
-      { departureDate: { $gte: now } }, 
-      { departureDate: { $gte: todayString } } 
+      { departureTime: { $gte: now } }, 
+      { departureTime: { $gte: todayString } } 
     ];
 
     if (searchTerm) {

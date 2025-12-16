@@ -41,7 +41,7 @@ async function createIndexes() {
     await db.collection('tickets').createIndex({ isAdvertised: 1 });
     await db.collection('tickets').createIndex({ transportType: 1 });
     await db.collection('tickets').createIndex({ from: 1, to: 1 });
-    await db.collection('tickets').createIndex({ departureDate: 1 });
+    await db.collection('tickets').createIndex({ departureTime: 1 });
     await db.collection('tickets').createIndex({ 
       from: 'text', 
       to: 'text', 

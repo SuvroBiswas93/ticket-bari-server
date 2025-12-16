@@ -35,12 +35,8 @@ const bookingSchema = {
       enum: ['pending', 'paid'],
       default: 'pending'
     },
-    departureDate: {
-      type: 'date',
-      required: true
-    },
     departureTime: {
-      type: 'string',
+      type: 'date',
       required: true
     },
     paymentId: {

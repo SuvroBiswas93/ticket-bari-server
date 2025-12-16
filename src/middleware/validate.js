@@ -31,10 +31,7 @@ export const validate = (schema) => {
       }
   
       // Replace validated data (only validated fields, extra fields are stripped)
-      req.body = value.body || req.body;
-      req.query = value.query || req.query;
-      req.params = value.params || req.params;
-      
+      req.body = value.body || req.body;      
       next();
     };
   };

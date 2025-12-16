@@ -32,12 +32,8 @@ const ticketSchema = {
       required: true,
       min: 0
     },
-    departureDate: {
-      type: 'date',
-      required: true
-    },
     departureTime: {
-      type: 'string',
+      type: 'date',
       required: true
     },
     perks: {
