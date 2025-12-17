@@ -6,7 +6,7 @@ import transactionRepository from '../repositories/transaction.repository.js';
 
 class BookingService {
   async createBooking(ticketId, userId, bookingQuantity) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket || !ticket.isActive) {
       throw new Error('Ticket not found');
     }
@@ -24,7 +24,7 @@ class BookingService {
       throw new Error('Not enough tickets available');
     }
 
-    const user = await userRepository.findById(userId);
+    const user = await userRepository.findById(userId?.toString());
     if (!user || !user.isActive) {
       throw new Error('User not found');
     }
@@ -32,14 +32,14 @@ class BookingService {
     const totalPrice = ticket.price * bookingQuantity;
 
     const booking = await bookingRepository.create({
-      ticketId: ticketId.toString(),
-      userId: userId.toString(),
+      ticketId: ticketId?.toString(),
+      userId: userId?.toString(),
       userName: user.name,
       userEmail: user.email,
       bookingQuantity,
       totalPrice,
       departureTime: ticket.departureTime,
-      vendorId: ticket.vendorId,
+      vendorId: ticket.vendorId?.toString(),
       ticketTitle: ticket.title,
       ticketPrice: ticket.price,
       transportType: ticket.transportType,
@@ -47,13 +47,13 @@ class BookingService {
       to: ticket.to
     });
 
-    await ticketRepository.reduceAvailableQuantity(ticketId, bookingQuantity);
+    await ticketRepository.reduceAvailableQuantity(ticketId?.toString(), bookingQuantity);
 
     return booking;
   }
 
   async getUserBookings(userId) {
-    const bookings = await bookingRepository.findUserBookings(userId);
+    const bookings = await bookingRepository.findUserBookings(userId?.toString());
 
     const bookingsWithCountdown = bookings.map(booking => {
       const departureDateTime = moment(booking.departureTime);
@@ -70,20 +70,20 @@ class BookingService {
   }
 
   async getVendorBookings(vendorId) {
-    return await bookingRepository.findVendorBookings(vendorId);
+    return await bookingRepository.findVendorBookings(vendorId?.toString());
   }
 
   async getPendingBookings(vendorId = null) {
-    return await bookingRepository.findPendingBookings(vendorId);
+    return await bookingRepository.findPendingBookings(vendorId?.toString());
   }
 
   async updateBookingStatus(bookingId, status, vendorId = null) {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await bookingRepository.findById(bookingId?.toString());
     if (!booking) {
       throw new Error('Booking not found');
     }
 
-    if (vendorId && booking.vendorId !== vendorId.toString()) {
+    if (vendorId && booking.vendorId !== vendorId?.toString()) {
       throw new Error('Not authorized to update this booking');
     }
 
@@ -94,20 +94,20 @@ class BookingService {
 
     if (status === 'rejected') {
       await ticketRepository.increaseAvailableQuantity(
-        booking.ticketId, 
+        booking.ticketId?.toString(), 
         booking.bookingQuantity
       );
     }
 
-    return await bookingRepository.updateBookingStatus(bookingId, status);
+    return await bookingRepository.updateBookingStatus(bookingId?.toString(), status);
   }
   async cancelBooking(bookingId, userId) {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await bookingRepository.findById(bookingId?.toString());
     if (!booking) {
       throw new Error('Booking not found');
     }
 
-    if (booking.userId !== userId.toString()) {
+    if (booking.userId !== userId?.toString()) {
       throw new Error('Not authorized to cancel this booking');
     }
 
@@ -116,21 +116,21 @@ class BookingService {
     }
 
     await ticketRepository.increaseAvailableQuantity(
-      booking.ticketId, 
+      booking.ticketId?.toString(), 
       booking.bookingQuantity
     );
 
-    await bookingRepository.delete(bookingId);
+    await bookingRepository.delete(bookingId?.toString());
 
     return true;
   }
 
   async getBookingStatistics(userId = null, vendorId = null) {
-    return await bookingRepository.getBookingStatistics(userId, vendorId);
+    return await bookingRepository.getBookingStatistics(userId?.toString(), vendorId?.toString());
   }
 
   async getRevenueByVendor(vendorId) {
-    return await bookingRepository.getRevenueByVendor(vendorId);
+    return await bookingRepository.getRevenueByVendor(vendorId?.toString());
   }
 }
 

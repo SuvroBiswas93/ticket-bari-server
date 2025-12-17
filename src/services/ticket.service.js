@@ -4,14 +4,14 @@ import bookingRepository from '../repositories/booking.repository.js';
 
 class TicketService {
   async createTicket(ticketData, vendorId) {
-    const vendor = await userRepository.findById(vendorId);
+    const vendor = await userRepository.findById(vendorId?.toString());
     if (!vendor || !vendor.isActive || vendor.isFraud) {
       throw new Error('Vendor not authorized to add tickets');
     }
 
     const ticket = await ticketRepository.create({
       ...ticketData,
-      vendorId: vendorId.toString(),
+      vendorId: vendorId?.toString(),
       vendorName: vendor.name,
       vendorEmail: vendor.email,
       availableQuantity: ticketData.totalQuantity
@@ -21,7 +21,7 @@ class TicketService {
   }
 
   async getTicketById(ticketId) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket) {
       throw new Error('Ticket not found');
     }
@@ -41,16 +41,16 @@ class TicketService {
   }
 
   async getVendorTickets(vendorId) {
-    return await ticketRepository.findTicketsByVendor(vendorId);
+    return await ticketRepository.findTicketsByVendor(vendorId?.toString());
   }
 
   async updateTicket(ticketId, updateData, vendorId = null) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket) {
       throw new Error('Ticket not found');
     }
 
-    if (vendorId && ticket.vendorId !== vendorId.toString()) {
+    if (vendorId && ticket.vendorId !== vendorId?.toString()) {
       throw new Error('Not authorized to update this ticket');
     }
 
@@ -63,26 +63,26 @@ class TicketService {
       }
     }
 
-    return await ticketRepository.update(ticketId, updateData);
+    return await ticketRepository.update(ticketId?.toString(), updateData);
   }
 
   async deleteTicket(ticketId, vendorId) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket) {
       throw new Error('Ticket not found');
     }
 
-    if (ticket.vendorId !== vendorId.toString()) {
+    if (ticket.vendorId !== vendorId?.toString()) {
       throw new Error('Not authorized to delete this ticket');
     }
 
-    const bookings = await bookingRepository.findBookingsByTicket(ticketId);
+    const bookings = await bookingRepository.findBookingsByTicket(ticketId?.toString());
     
     if (bookings.length > 0) {
       throw new Error('Cannot delete ticket with existing bookings');
     }
 
-    await ticketRepository.update(ticketId, { isActive: false });
+    await ticketRepository.update(ticketId?.toString(), { isActive: false });
 
     return true;
   }
@@ -143,16 +143,16 @@ class TicketService {
   }
 
   async updateVerificationStatus(ticketId, status) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket) {
       throw new Error('Ticket not found');
     }
 
-    return await ticketRepository.update(ticketId, { verificationStatus: status });
+    return await ticketRepository.update(ticketId?.toString(), { verificationStatus: status });
   }
 
   async toggleAdvertisement(ticketId, isAdvertised) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket) {
       throw new Error('Ticket not found');
     }
@@ -172,11 +172,11 @@ class TicketService {
       }
     }
 
-    return await ticketRepository.update(ticketId, { isAdvertised });
+    return await ticketRepository.update(ticketId?.toString(), { isAdvertised });
   }
 
   async reduceTicketQuantity(ticketId, quantity) {
-    const result = await ticketRepository.reduceAvailableQuantity(ticketId, quantity);
+    const result = await ticketRepository.reduceAvailableQuantity(ticketId?.toString(), quantity);
     if (!result) {
       throw new Error('Failed to reduce ticket quantity');
     }
@@ -184,7 +184,7 @@ class TicketService {
   }
 
   async increaseTicketQuantity(ticketId, quantity) {
-    const result = await ticketRepository.increaseAvailableQuantity(ticketId, quantity);
+    const result = await ticketRepository.increaseAvailableQuantity(ticketId?.toString(), quantity);
     if (!result) {
       throw new Error('Failed to increase ticket quantity');
     }

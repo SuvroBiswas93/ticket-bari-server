@@ -2,7 +2,6 @@ import Stripe from 'stripe';
 import bookingRepository from '../repositories/booking.repository.js';
 import transactionRepository from '../repositories/transaction.repository.js';
 import userRepository from '../repositories/user.repository.js';
-import moment from 'moment';
 import  {env} from "../config/env.js";
 
 
@@ -12,12 +11,12 @@ class PaymentService {
   }
 
   async createCheckoutSession(bookingId, userId) {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await bookingRepository.findById(bookingId?.toString());
     if (!booking) {
       throw new Error('Booking not found');
     }
 
-    if (booking.userId !== userId.toString()) {
+    if (booking.userId !== userId?.toString()) {
       throw new Error('Not authorized to pay for this booking');
     }
 
@@ -34,12 +33,12 @@ class PaymentService {
       throw new Error('Cannot pay for past departure');
     }
 
-    const user = await userRepository.findById(booking.userId);
+    const user = await userRepository.findById(booking.userId?.toString());
     if (!user) {
       throw new Error('User not found');
     }
     
-    const vendor = await userRepository.findById(booking.vendorId);
+    const vendor = await userRepository.findById(booking.vendorId?.toString());
     if (!vendor) {
       throw new Error('Vendor not found');
     }
@@ -66,9 +65,9 @@ class PaymentService {
       ],
       mode: 'payment',
       metadata: {
-        userId: booking.userId,
-        bookingId: bookingId,
-        ticketId: booking.ticketId,
+        userId: booking.userId?.toString(),
+        bookingId: bookingId?.toString(),
+        ticketId: booking.ticketId?.toString(),
         ticketTitle: booking.ticketTitle,
       },
       customer_email: user.email,
@@ -79,11 +78,11 @@ class PaymentService {
     return session;
   }
   async getUserTransactions(userId) {
-    return await transactionRepository.findUserTransactions(userId.toString());
+    return await transactionRepository.findUserTransactions(userId?.toString());
   }
 
   async getTransactionById(transactionId) {
-    return await transactionRepository.findById(transactionId.toString());
+    return await transactionRepository.findById(transactionId?.toString());
   }
   async handleWebhook(req) {
     const sig = req.headers['stripe-signature'];
@@ -112,29 +111,29 @@ class PaymentService {
     return {received: true};
   }
   async handleCheckoutSessionCompleted(session) {
-    return await this.processPayment(session.metadata.bookingId.toString(), session.id);
+    return await this.processPayment(session.metadata?.bookingId?.toString(), session.id, session.currency);
   }
-  async processPayment(bookingId, paymentId) {
-    const booking = await bookingRepository.findById(bookingId);
+  async processPayment(bookingId, paymentId, currency) {
+    const booking = await bookingRepository.findById(bookingId?.toString());
     if (!booking) {
       throw new Error('Booking not found');
     }
 
     const updatedBooking = await bookingRepository.updatePaymentStatus(
-      bookingId, 
+      bookingId?.toString(), 
       'paid', 
-      paymentId
+      paymentId?.toString()
     );
 
     await transactionRepository.create({
-      userId: booking.userId,
-      bookingId: bookingId,
-      ticketId: booking.ticketId,
+      userId: booking.userId?.toString(),
+      bookingId: bookingId?.toString(),
+      ticketId: booking.ticketId?.toString(),
       ticketTitle: booking.ticketTitle,
       amount: booking.totalPrice,
-      currency: 'BDT',
+      currency: currency || 'bdt',
       paymentMethod: 'stripe',
-      transactionId: paymentId,
+      transactionId: paymentId?.toString(),
       status: 'success'
     });
 

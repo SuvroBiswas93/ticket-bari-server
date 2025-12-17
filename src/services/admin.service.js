@@ -12,16 +12,16 @@ class AdminService {
   }
 
   async updateUserRole(userId, role) {
-    const user = await userRepository.findById(userId);
+    const user = await userRepository.findById(userId?.toString());
     if (!user) {
       throw new Error('User not found');
     }
 
-    return await userRepository.updateUserRole(userId, role);
+    return await userRepository.updateUserRole(userId?.toString(), role);
   }
 
   async markVendorAsFraud(userId) {
-    const user = await userRepository.findById(userId);
+    const user = await userRepository.findById(userId?.toString());
     if (!user) {
       throw new Error('User not found');
     }
@@ -30,10 +30,10 @@ class AdminService {
       throw new Error('Only vendors can be marked as fraud');
     }
 
-    const updatedUser = await userRepository.markAsFraud(userId);
+    const updatedUser = await userRepository.markAsFraud(userId?.toString());
 
     await ticketRepository.updateMany(
-      { vendorId: userId.toString() },
+      { vendorId: userId?.toString() },
       { isActive: false }
     );
 
@@ -45,18 +45,18 @@ class AdminService {
   }
 
   async updateVerificationStatus(ticketId, status) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket) {
       throw new Error('Ticket not found');
     }
     if (!['approved', 'rejected', 'pending'].includes(status)) {
       throw new Error('Invalid verification status');
     }
-    return await ticketRepository.update(ticketId, { verificationStatus: status });
+    return await ticketRepository.update(ticketId?.toString(), { verificationStatus: status });
   }
 
   async toggleAdvertisement(ticketId, isAdvertised) {
-    const ticket = await ticketRepository.findById(ticketId);
+    const ticket = await ticketRepository.findById(ticketId?.toString());
     if (!ticket) {
       throw new Error('Ticket not found');
     }
@@ -67,13 +67,13 @@ class AdminService {
       const count = await ticketRepository.count({
         isAdvertised: true,
         verificationStatus: 'approved',
-        _id: { $ne: ticketId }
+        _id: { $ne: ticketRepository.toObjectId(ticketId) }
       });
       if (count >= 6) {
         throw new Error('Maximum 6 tickets can be advertised at a time');
       }
     }
-    return await ticketRepository.update(ticketId, { isAdvertised });
+    return await ticketRepository.update(ticketId?.toString(), { isAdvertised });
   }
 
   async getDashboardStats() {

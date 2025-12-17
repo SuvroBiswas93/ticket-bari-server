@@ -1,9 +1,8 @@
 import userRepository from '../repositories/user.repository.js';
-import { verifyIdToken } from '../config/firebase.js';
 
 class AuthService {
   async getCurrentUser(userId) {
-    const user = await userRepository.findById(userId);
+    const user = await userRepository.findById(userId?.toString());
     
     if (!user) {
       throw new Error('User not found');
@@ -17,18 +16,23 @@ class AuthService {
   }
 
   async updateProfile(userId, updateData) {
-    const user = await userRepository.update(userId, updateData);
+    const user = await userRepository.update(userId?.toString(), updateData);
     return user;
   }
 
   async registerVendor(userId) {
-    const user = await userRepository.findById(userId);
+    const user = await userRepository.findById(userId?.toString());
     
     if (!user) {
       throw new Error('User not found');
     }
 
-    const updatedUser = await userRepository.update(userId, { role: 'vendor' });
+
+    if(user.role !== 'user') {
+      throw new Error('Only users with role "user" can register as vendors');
+    }
+
+    const updatedUser = await userRepository.update(userId?.toString(), { role: 'vendor' });
     
     return updatedUser;
   }
