@@ -57,11 +57,11 @@ app.get('/', (_req, res) => {
   res.json({ message: 'server is running' });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/tickets', ticketRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/payment', paymentRoutes);
+app.use('/auth', authRoutes);
+app.use('/tickets', ticketRoutes);
+app.use('/bookings', bookingRoutes);
+app.use('/admins', adminRoutes);
+app.use('/payments', paymentRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
