@@ -32,6 +32,19 @@ class UserRepository extends BaseRepository {
       isActive: false 
     });
   }
+
+  async getStatistics() {
+    const pipeline = [
+      {
+        $group: {
+          _id: '$role',
+          count: { $sum: 1 }
+        }
+      }
+    ];
+
+    return await this.aggregate(pipeline);
+  }
 }
 
 export default new UserRepository();
