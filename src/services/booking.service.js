@@ -130,7 +130,33 @@ class BookingService {
   }
 
   async getRevenueByVendor(vendorId) {
-    return await bookingRepository.getRevenueByVendor(vendorId?.toString());
+    // Get paid bookings to calculate totals
+    const paidBookings = await bookingRepository.getPaidBookingsByVendor(vendorId?.toString());
+    
+    // Calculate totals
+    const totalRevenue = paidBookings.reduce((sum, booking) => sum + (booking.totalPrice || 0), 0);
+    const totalTicketsSold = paidBookings.reduce((sum, booking) => sum + (booking.bookingQuantity || 0), 0);
+    
+    // Get total tickets added by vendor
+    const vendorTickets = await ticketRepository.findTicketsByVendor(vendorId?.toString());
+    const totalTicketsAdded = vendorTickets.length;
+    
+    // Get revenue data grouped by ticket
+    const ticketsRevenueData = await bookingRepository.getRevenueByTicket(vendorId?.toString());
+    
+    // Transform data to match frontend format
+    const ticketsData = ticketsRevenueData.map(item => ({
+      title: item.ticketTitle || 'Unknown Ticket',
+      sold: item.sold || 0,
+      revenue: item.revenue || 0
+    }));
+    
+    return {
+      totalRevenue,
+      totalTicketsSold,
+      totalTicketsAdded,
+      ticketsData
+    };
   }
 }
 

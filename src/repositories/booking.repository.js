@@ -91,6 +91,23 @@ class BookingRepository extends BaseRepository {
     return await this.aggregate(pipeline);
   }
 
+  async getRevenueByTicket(vendorId) {
+    const pipeline = [
+      { $match: { vendorId, paymentStatus: 'paid' } },
+      {
+        $group: {
+          _id: '$ticketId',
+          ticketTitle: { $first: '$ticketTitle' },
+          sold: { $sum: '$bookingQuantity' },
+          revenue: { $sum: '$totalPrice' }
+        }
+      },
+      { $sort: { revenue: -1 } }
+    ];
+
+    return await this.aggregate(pipeline);
+  }
+
   async getPaidBookingsByVendor(vendorId) {
     return await this.find({ vendorId, paymentStatus: 'paid' });
   }

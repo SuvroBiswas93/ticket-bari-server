@@ -161,6 +161,27 @@ class BookingController {
       });
     }
   }
+
+  async getRevenueByVendor(req, res) {
+    try {
+      // Vendors can only see their own revenue, admins can see any vendor's revenue
+      const vendorId = req.user.role === 'admin' && req.params.vendorId 
+        ? req.params.vendorId 
+        : req.user._id.toString();
+      
+      const revenue = await bookingService.getRevenueByVendor(vendorId);
+      
+      res.status(200).json({
+        status: 'success',
+        data: revenue
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error.message
+      });
+    }
+  }
 }
 
 export default new BookingController();
