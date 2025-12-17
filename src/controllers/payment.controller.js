@@ -80,6 +80,25 @@ class PaymentController {
       });
     }
   }
+
+  async handleCheckoutSessionCompleted(req, res) {
+    try {
+      const sessionId = req.body.sessionId;
+
+      const booking = await paymentService.handleApiCheckoutSessionCompleted(sessionId);
+      
+      res.status(200).json({
+        status: 'success',
+        message: 'Payment processed successfully',
+        data: booking
+      });
+    } catch (error) {
+      res.status(400).json({
+        status: 'error',
+        message: error.message
+      });
+    }
+  }
 }
 
 export default new PaymentController();

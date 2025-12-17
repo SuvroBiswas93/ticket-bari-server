@@ -113,6 +113,32 @@ class PaymentService {
   async handleCheckoutSessionCompleted(session) {
     return await this.processPayment(session.metadata?.bookingId?.toString(), session.id, session.currency);
   }
+  async handleApiCheckoutSessionCompleted(sessionId) {
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+    
+    if (!session) {
+      throw new Error('Session not found');
+    }
+
+    if (session.payment_status !== 'paid') {
+      throw new Error('Payment not completed');
+    }
+
+
+    const existingTransaction = await transactionRepository.findOne({
+      transactionId: session.id
+    });
+
+    if (existingTransaction) {
+      const booking = await bookingRepository.findById(
+        session.metadata?.bookingId?.toString()
+      );
+      return booking;
+    }
+
+    return await this.handleCheckoutSessionCompleted(session);
+  }
+
   async processPayment(bookingId, paymentId, currency) {
     const booking = await bookingRepository.findById(bookingId?.toString());
     if (!booking) {
