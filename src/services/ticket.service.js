@@ -83,7 +83,7 @@ class TicketService {
       throw new Error('Cannot delete ticket with existing bookings');
     }
 
-    await ticketRepository.update(ticketId?.toString(), { isActive: false });
+    await ticketRepository.delete(ticketId?.toString());
 
     return true;
   }
