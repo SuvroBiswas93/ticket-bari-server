@@ -14,6 +14,7 @@ class TicketService {
       vendorId: vendorId?.toString(),
       vendorName: vendor.name,
       vendorEmail: vendor.email,
+      verificationStatus: 'pending',
       availableQuantity: ticketData.totalQuantity
     });
 
