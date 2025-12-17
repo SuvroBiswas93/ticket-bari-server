@@ -5,7 +5,7 @@ export const adminValidation = {
       role: Joi.string().valid('user', 'vendor', 'admin').required()
     }),
   
-    markAsFraud: Joi.object({
+    toggleFraudStatus: Joi.object({
       isFraud: Joi.boolean().required()
     }),
   

@@ -26,11 +26,12 @@ class UserRepository extends BaseRepository {
     return await this.update(userId, { role });
   }
 
-  async markAsFraud(userId) {
-    return await this.update(userId, { 
-      isFraud: true,
-      isActive: false 
-    });
+  async toggleFraudStatus(userId, isFraud) {
+    const updateData = { 
+      isFraud: isFraud,
+    };
+
+    return await this.update(userId, updateData);
   }
 
   async getStatistics() {

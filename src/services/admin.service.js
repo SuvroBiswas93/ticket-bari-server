@@ -20,21 +20,22 @@ class AdminService {
     return await userRepository.updateUserRole(userId?.toString(), role);
   }
 
-  async markVendorAsFraud(userId) {
+  async toggleVendorFraudStatus(userId, isFraud) {
     const user = await userRepository.findById(userId?.toString());
     if (!user) {
       throw new Error('User not found');
     }
 
     if (user.role !== 'vendor') {
-      throw new Error('Only vendors can be marked as fraud');
+      throw new Error('Only vendors can have fraud status toggled');
     }
 
-    const updatedUser = await userRepository.markAsFraud(userId?.toString());
+    const updatedUser = await userRepository.toggleFraudStatus(userId?.toString(), isFraud);
 
+    // Update ticket active status based on fraud status
     await ticketRepository.updateMany(
       { vendorId: userId?.toString() },
-      { isActive: false }
+      { isActive: !isFraud }
     );
 
     return updatedUser;

@@ -73,9 +73,9 @@ class AdminController {
     }
   }
 
-  async markVendorAsFraud(req, res) {
+  async toggleVendorFraudStatus(req, res) {
     try {
-      const user = await adminService.markVendorAsFraud(req.params.id);
+      const user = await adminService.toggleVendorFraudStatus(req.params.id, req.body.isFraud);
       
       const message = req.body.isFraud 
         ? 'Vendor marked as fraud successfully' 

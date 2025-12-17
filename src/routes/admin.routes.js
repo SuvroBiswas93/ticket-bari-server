@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.get('/users', auth, adminOnly, adminController.getAllUsers);
 router.put('/users/:id/role', auth, adminOnly, validate(adminValidation.updateUserRole), adminController.updateUserRole);
-router.put('/users/:id/fraud', auth, adminOnly, validate(adminValidation.markAsFraud), adminController.markVendorAsFraud);
+router.put('/users/:id/fraud', auth, adminOnly, validate(adminValidation.toggleFraudStatus), adminController.toggleVendorFraudStatus);
 
 router.get('/tickets/all', auth, adminOnly, adminController.getAllTickets);
 router.put('/tickets/:id/verify', auth, adminOnly, validate(adminValidation.updateVerification), adminController.updateVerificationStatus);
