@@ -12,7 +12,7 @@ import adminRoutes from './routes/admin.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 
 const app = express();
-const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3000', 'https://online-ticket-booking-fullstack.netlify.app/', 'http://localhost:5000'];
+const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'https://online-ticket-booking-fullstack.netlify.app/', 'http://localhost:5000'];
 const port = env.port;
 
 app.use(cors({
