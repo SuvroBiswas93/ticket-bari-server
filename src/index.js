@@ -89,4 +89,10 @@ async function startServer() {
   }
 }
 
-startServer().catch(console.error);
+
+
+if (process.env.VERCEL === undefined) {
+  startServer().catch(console.error);
+}
+
+export default app;
