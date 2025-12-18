@@ -1,10 +1,11 @@
-import {env} from './config/env.js';
 import express from 'express';
 import cors from 'cors';
+import { env } from './config/env.js';
 import { connectDB } from './config/database.js';
 import initializeAdmin from './utils/initializeAdmin.js';
 import { initializeFirebase } from './config/firebase.js';
 import errorHandler from './middleware/error.js';
+
 import authRoutes from './routes/auth.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
@@ -12,59 +13,73 @@ import adminRoutes from './routes/admin.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 
 const app = express();
-const allowedOrigins = [env.clientUrl, 'http://localhost:3000', 'https://online-ticket-booking-fullstack.netlify.app/', 'http://localhost:5000'];
-const port = env.port;
 
-app.use(cors({
-  origin: function (origin, callback) {
-    console.log("Here is my origin", origin);
-    console.log(`Here is my allowed origin ${allowedOrigins.join(',')}`)
-    console.log(`Is in the allowed list ${allowedOrigins.indexOf(origin) !== -1}`)
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      return callback(null, false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Set-Cookie']
-}));
+/* =========================
+   CORS CONFIG (FIXED)
+========================= */
 
-// Apply raw body parser for webhook route (must be before JSON parser)
+const allowedOrigins = [
+  env.clientUrl, // keep this exact (no slash)
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'https://online-ticket-booking-fullstack.netlify.app'
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow server-to-server, Postman, curl
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.error(`❌ CORS blocked origin: ${origin}`);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
+// Important for preflight requests
+app.options('*', cors());
+
+/* =========================
+   BODY PARSERS
+========================= */
+
+// Stripe / webhook raw body (must come first)
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
 
-const jsonParser = express.json({ limit: '10mb' });
-const urlencodedParser = express.urlencoded({ extended: true, limit: '10mb' });
+// Normal parsers
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-app.use((req, res, next) => {
-  if (req.path === '/api/payment/webhook') {
-    return next();
-  }
-  jsonParser(req, res, next);
-});
-
-app.use((req, res, next) => {
-  if (req.path === '/api/payment/webhook') {
-    return next();
-  }
-  urlencodedParser(req, res, next);
-});
+/* =========================
+   HEALTH CHECK
+========================= */
 
 app.get('/', (_req, res) => {
-  res.json({ message: 'server is running' });
+  res.status(200).json({ message: 'Server is running 🚀' });
 });
+
+/* =========================
+   ROUTES
+========================= */
 
 app.use('/auth', authRoutes);
 app.use('/tickets', ticketRoutes);
 app.use('/bookings', bookingRoutes);
 app.use('/admins', adminRoutes);
 app.use('/payments', paymentRoutes);
-// 404 handler
+
+/* =========================
+   404 HANDLER
+========================= */
+
 app.use((req, res) => {
   res.status(404).json({
     status: 'error',
@@ -72,24 +87,33 @@ app.use((req, res) => {
   });
 });
 
-// Error handling middleware
+/* =========================
+   GLOBAL ERROR HANDLER
+========================= */
+
 app.use(errorHandler);
+
+/* =========================
+   SERVER INIT (VERCEL SAFE)
+========================= */
 
 async function startServer() {
   try {
-    await connectDB();
+    await connectDB();       // MUST be cached internally
     await initializeAdmin();
     initializeFirebase();
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
+
+    // Local dev only (Vercel ignores this)
+    if (env.nodeEnv !== 'production') {
+      app.listen(env.port, () => {
+        console.log(`Server running on port ${env.port}`);
+      });
+    }
   } catch (error) {
-    console.error('Error starting server:', error);
-    process.exit(1);
+    console.error('❌ Server startup failed:', error);
   }
 }
 
-
-startServer().catch(console.error);
+startServer();
 
 export default app;
