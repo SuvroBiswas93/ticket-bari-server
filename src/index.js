@@ -17,14 +17,16 @@ const port = env.port;
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log("Here is my origin", origin);
+    console.log(`Here is my allowed origin ${allowedOrigins.join(',')}`)
+    console.log(`Is in the allowed list ${allowedOrigins.indexOf(origin) !== -1}`)
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      console.log(origin, 'origin');
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, false);
     }
   },
   credentials: true,
