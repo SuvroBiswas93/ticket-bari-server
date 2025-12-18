@@ -15,11 +15,27 @@ import paymentRoutes from './routes/payment.routes.js';
 const app = express();
 
 /* =========================
-   CORS CONFIG (FIXED)
+   SAFE SINGLETON INIT
+========================= */
+
+let isInitialized = false;
+
+const initApp = async () => {
+  if (isInitialized) return;
+
+  await connectDB();       // must be cached internally
+  initializeFirebase();    // must check if already initialized
+  await initializeAdmin();
+
+  isInitialized = true;
+};
+
+/* =========================
+   CORS (STABLE)
 ========================= */
 
 const allowedOrigins = [
-  env.clientUrl, // keep this exact (no slash)
+  env.clientUrl,
   'http://localhost:3000',
   'http://localhost:5000',
   'https://online-ticket-booking-fullstack.netlify.app'
@@ -28,47 +44,45 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow server-to-server, Postman, curl
       if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      console.error(`❌ CORS blocked origin: ${origin}`);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
-// Important for preflight requests
 app.options('*', cors());
 
 /* =========================
    BODY PARSERS
 ========================= */
 
-// Stripe / webhook raw body (must come first)
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
-
-// Normal parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 /* =========================
-   HEALTH CHECK
+   INIT MIDDLEWARE (KEY)
 ========================= */
 
-app.get('/', (_req, res) => {
-  res.status(200).json({ message: 'Server is running 🚀' });
+app.use(async (_req, _res, next) => {
+  try {
+    await initApp();
+    next();
+  } catch (error) {
+    console.error('Initialization failed:', error);
+    next(error);
+  }
 });
 
 /* =========================
    ROUTES
 ========================= */
+
+app.get('/', (_req, res) => {
+  res.json({ message: 'Server is running 🚀' });
+});
 
 app.use('/auth', authRoutes);
 app.use('/tickets', ticketRoutes);
@@ -77,7 +91,7 @@ app.use('/admins', adminRoutes);
 app.use('/payments', paymentRoutes);
 
 /* =========================
-   404 HANDLER
+   404 & ERROR
 ========================= */
 
 app.use((req, res) => {
@@ -87,33 +101,6 @@ app.use((req, res) => {
   });
 });
 
-/* =========================
-   GLOBAL ERROR HANDLER
-========================= */
-
 app.use(errorHandler);
-
-/* =========================
-   SERVER INIT (VERCEL SAFE)
-========================= */
-
-async function startServer() {
-  try {
-    await connectDB();       // MUST be cached internally
-    await initializeAdmin();
-    initializeFirebase();
-
-    // Local dev only (Vercel ignores this)
-    if (env.nodeEnv !== 'production') {
-      app.listen(env.port, () => {
-        console.log(`Server running on port ${env.port}`);
-      });
-    }
-  } catch (error) {
-    console.error('❌ Server startup failed:', error);
-  }
-}
-
-startServer();
 
 export default app;
