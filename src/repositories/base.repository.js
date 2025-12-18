@@ -8,7 +8,6 @@ export class BaseRepository {
     this.schema = schema;
     this.joiSchema = schema ? schemaToJoi(schema) : null;
     this.joiPartialSchema = schema ? schemaToJoi(schema, { partial: true }) : null;
-    connectDB();
   }
   toObjectId(id) {
     if (!id) return id;
