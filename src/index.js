@@ -5,7 +5,6 @@ import { connectDB } from './config/database.js';
 import initializeAdmin from './utils/initializeAdmin.js';
 import { initializeFirebase } from './config/firebase.js';
 import errorHandler from './middleware/error.js';
-
 import authRoutes from './routes/auth.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
@@ -14,25 +13,20 @@ import paymentRoutes from './routes/payment.routes.js';
 
 const app = express();
 
-/* =========================
-   SAFE SINGLETON INIT
-========================= */
 
 let isInitialized = false;
 
 const initApp = async () => {
   if (isInitialized) return;
 
-  await connectDB();       // must be cached internally
-  initializeFirebase();    // must check if already initialized
+  await connectDB();       
+  initializeFirebase();    
   await initializeAdmin();
 
   isInitialized = true;
 };
 
-/* =========================
-   CORS (STABLE)
-========================= */
+
 
 const allowedOrigins = [
   env.clientUrl,
@@ -52,19 +46,12 @@ app.use(
   })
 );
 
-// app.options('*', cors());
-
-/* =========================
-   BODY PARSERS
-========================= */
 
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-/* =========================
-   INIT MIDDLEWARE (KEY)
-========================= */
+
 
 app.use(async (_req, _res, next) => {
   try {
@@ -76,9 +63,6 @@ app.use(async (_req, _res, next) => {
   }
 });
 
-/* =========================
-   ROUTES
-========================= */
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Server is running 🚀' });
@@ -90,9 +74,6 @@ app.use('/bookings', bookingRoutes);
 app.use('/admins', adminRoutes);
 app.use('/payments', paymentRoutes);
 
-/* =========================
-   404 & ERROR
-========================= */
 
 app.use((req, res) => {
   res.status(404).json({
