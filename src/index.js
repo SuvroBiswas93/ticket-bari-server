@@ -65,7 +65,7 @@ app.use(async (_req, _res, next) => {
 
 
 app.get('/', (_req, res) => {
-  res.json({ message: 'Server is running 🚀' });
+  res.json({ message: 'Hello From Server,, Server is running!!!' });
 });
 
 app.use('/auth', authRoutes);
